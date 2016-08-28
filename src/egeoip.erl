@@ -38,6 +38,14 @@
 -export([address_fast/3]).
 -endif.
 
+%% Erlang 18.x introduced Time and Time Correction and new bifs
+-ifdef(monotonic_time).
+-define(NOW, erlang:monotic_time()).
+-else.
+-define(NOW, erlang:now()).
+-endif.
+
+
 %% geoip record API
 
 %% @type geoip_atom() = country_code | country_code3 | country_name |
@@ -531,10 +539,9 @@ bench(Count) ->
                  "61.16.226.206",
                  "64.180.1.78",
                  "138.217.4.11"],
-    StartParse = now(),
+    StartParse = ?NOW,
     benchcall(fun () -> [lookup(X) || X <- SampleIPs] end, Count),
-    EndParse = now(),
-    {parse_100k_addr, pytime(EndParse) - pytime(StartParse)}.
+    {parse_100k_addr, pytime(?NOW) - pytime(StartParse)}.
 
 ensure_binary_list(L) when is_list(L) ->
     list_to_binary(L);
